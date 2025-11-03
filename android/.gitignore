@@ -1,0 +1,113 @@
+# =========================
+# Flutter & Dart
+# =========================
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+flutter_export_environment.sh
+
+# =========================
+# IDEs & Editors
+# =========================
+.idea/
+.vscode/
+*.iml
+
+# =========================
+# Android
+# =========================
+.android/
+gradle/
+.gradle/
+**/gradle-wrapper.jar
+**/gradlew
+**/gradlew.bat
+**/local.properties
+**/.cxx/
+**/captures/
+*.apk
+*.aab
+
+# Generated Android files
+app/release/
+app/debug/
+GeneratedPluginRegistrant.java
+
+# =========================
+# iOS
+# =========================
+.ios/
+Flutter/Flutter.framework
+Flutter/Flutter.podspec
+Flutter/Generated.xcconfig
+Flutter/ephemeral/
+Pods/
+DerivedData/
+Runner.xcworkspace/
+Runner.xcodeproj/project.xcworkspace/
+Runner.xcodeproj/xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+
+# =========================
+# macOS
+# =========================
+.macos/
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+build/
+
+# =========================
+# Firebase / Google Services
+# =========================
+google-services.json
+GoogleService-Info.plist
+firebase_app_id_file.json
+
+# =========================
+# Keystores & Secrets
+# =========================
+key.properties
+**/*.keystore
+**/*.jks
+**/*.pem
+**/*.p12
+
+# =========================
+# Logs, temporary files & caches
+# =========================
+*.log
+*.tmp
+*.swp
+*.lock
+*.DS_Store
+Thumbs.db
+
+# =========================
+# Environment / Config
+# =========================
+.env
+.env.*
+*.config
+*.credentials
+*.secrets
+
+# =========================
+# Misc
+# =========================
+*.bak
+*.old
+*.orig
+*.rej
+
+# =========================
+# Coverage & Reports
+# =========================
+coverage/
+test_output/
+reports/
