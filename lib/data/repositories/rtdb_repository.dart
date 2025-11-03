@@ -114,13 +114,20 @@ class RTDBRepo {
 
   Future<void> upvoteLecture(String c, String l, String q, String uid) async {
     final votePath = 'lectureQuestions/$c/$l/$q/votes/$uid';
-    final upvotesPath = 'lectureQuestions/$c/$l/$q/upvotes';
+    final upvotesRef = db.child('lectureQuestions/$c/$l/$q/upvotes');
+
+    // Prevent double voting
     final voteSnap = await db.child(votePath).get();
     if (voteSnap.exists) return;
-    await db.update({ votePath: true });
-    final curSnap = await db.child(upvotesPath).get();
-    final cur = (curSnap.value ?? 0) as int;
-    await db.child(upvotesPath).set(cur + 1);
+
+    // Record user's vote
+    await db.child(votePath).set(true);
+
+    // Atomically increment upvotes and trigger real-time update
+    await upvotesRef.runTransaction((currentData) {
+      final cur = (currentData as int?) ?? 0;
+      return Transaction.success(cur + 1);
+    });
   }
 
   Future<void> answerLecture(String c, String l, String q, String text, String uid) async {
