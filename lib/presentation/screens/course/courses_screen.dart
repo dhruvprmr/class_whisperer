@@ -203,7 +203,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                               onTap: () => Navigator.pushNamed(
                                 context,
                                 AppRoutes.courseHome,
-                                arguments: courseId,
+                                arguments: title,
                               ),
                             ),
                           );

@@ -193,6 +193,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           final title = snap.data?.value != null
                               ? ((snap.data!.value as Map)['title'] ?? courseId)
                               : courseId;
+                          final code = snap.data?.value != null
+                              ? ((snap.data!.value as Map)['code'] ?? courseId)
+                              : courseId;
 
                           return Card(
                             elevation: 3,
@@ -213,7 +216,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   color: Colors.black87,
                                 ),
                               ),
-                              subtitle: Text('Course ID: $courseId'),
+                              subtitle: Text(
+                                'Course Code: $code',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
                               trailing: const Icon(
                                 Icons.arrow_forward_ios_rounded,
                                 size: 16,
@@ -272,7 +281,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     itemCount: items.length,
                     itemBuilder: (_, i) {
                       final q = items[i];
-                      final path = (q.value as Map)['path'] ?? '';
+                      final questionText = (q.value as Map)['question'] ?? 'No question text';
                       return Card(
                         elevation: 2,
                         shape: RoundedRectangleBorder(
@@ -290,7 +299,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             style: const TextStyle(
                                 fontWeight: FontWeight.w600),
                           ),
-                          subtitle: Text(path.toString()),
+                          subtitle: Text(
+                            questionText.toString(),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
                         ),
                       );
                     },
