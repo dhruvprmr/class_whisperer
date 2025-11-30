@@ -19,6 +19,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    print("CURRENT UID = $uid");
     _fetchAnonName();
   }
 
@@ -74,14 +75,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             accountName: loadingName
-                ? const Text("Loading...", style: TextStyle(color: Colors.white70))
+                ? const Text(
+                    "Loading...",
+                    style: TextStyle(color: Colors.white70),
+                  )
                 : Text(
-              anonName ?? "Student",
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
+                    anonName ?? "Student",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
             accountEmail: Text(
               FirebaseAuth.instance.currentUser?.email ?? '',
               style: const TextStyle(color: Colors.white70),

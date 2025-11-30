@@ -2,8 +2,45 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
-class MyQuestionsScreen extends StatelessWidget {
+class MyQuestionsScreen extends StatefulWidget {
   const MyQuestionsScreen({super.key});
+  @override
+  State<MyQuestionsScreen> createState() => _MyQuestionsScreenState();
+}
+
+class _MyQuestionsScreenState extends State<MyQuestionsScreen> {
+  String filter = "all";
+
+  Widget _buildFilterButton(String label, String value) {
+    final bool active = filter == value;
+    return GestureDetector(
+      onTap: () => setState(() => filter = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: active ? Colors.white : Colors.white.withOpacity(0.25),
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: active
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active ? const Color(0xFF009B8F) : Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +88,19 @@ class MyQuestionsScreen extends StatelessWidget {
                 ),
               ),
 
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildFilterButton("All", "all"),
+                    _buildFilterButton("General", "general"),
+                    _buildFilterButton("Lecture", "lecture"),
+                    _buildFilterButton("By Course", "course"),
+                  ],
+                ),
+              ),
+
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -89,11 +139,27 @@ class MyQuestionsScreen extends StatelessWidget {
                           return t2.compareTo(t1);
                         });
 
+                      final filtered = <MapEntry>[];
+
+                      for (var e in items) {
+                        final q = e.value as Map;
+                        final path = q['path'] ?? '';
+                        final segments = path.split('/');
+                        final type = segments.isNotEmpty ? segments[0] : 'unknown';
+
+                        if (filter == "general" && type != "courseGeneralQuestions") continue;
+                        if (filter == "lecture" && type != "lectureQuestions") continue;
+
+                        filtered.add(e);
+                      }
+
+                      final listToShow = (filter == "course") ? items : filtered;
+
                       return ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: items.length,
+                        itemCount: listToShow.length,
                         itemBuilder: (context, index) {
-                          final e = items[index];
+                          final e = listToShow[index];
                           final q = e.value as Map;
 
                           final path = q['path'] ?? '';
@@ -130,38 +196,43 @@ class MyQuestionsScreen extends StatelessWidget {
                                       return Container(
                                         margin: const EdgeInsets.symmetric(vertical: 8),
                                         decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            colors: [Color(0xFFF6FFFB), Color(0xFFEAFDF7)],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                          borderRadius: BorderRadius.circular(16),
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(20),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.black.withOpacity(0.05),
-                                              blurRadius: 6,
-                                              offset: const Offset(0, 3),
+                                              color: Colors.black.withOpacity(0.06),
+                                              blurRadius: 12,
+                                              offset: const Offset(0, 6),
                                             ),
                                           ],
                                         ),
                                         child: ListTile(
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                          leading: CircleAvatar(
-                                            radius: 24,
-                                            backgroundColor: const Color(0xFF00C68E).withOpacity(0.15),
-                                            child: const Icon(Icons.help_outline, color: Color(0xFF009B8F)),
+                                          leading: Container(
+                                            width: 46,
+                                            height: 46,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF00C68E).withOpacity(0.12),
+                                              borderRadius: BorderRadius.circular(14),
+                                            ),
+                                            child: const Icon(Icons.help_outline, color: Color(0xFF009B8F), size: 26),
                                           ),
                                           title: Text(
                                             text,
                                             style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 16,
-                                              color: Color(0xFF002B27),
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 17,
+                                              color: Color(0xFF00332F),
+                                              height: 1.3,
                                             ),
                                           ),
                                           subtitle: Text(
                                             subtitle,
-                                            style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 14,
+                                              height: 1.3,
+                                            ),
                                           ),
                                           trailing: const Icon(
                                             Icons.arrow_forward_ios_rounded,
