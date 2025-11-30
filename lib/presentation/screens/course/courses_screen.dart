@@ -30,26 +30,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
       final uid = FirebaseAuth.instance.currentUser!.uid;
       await repo.joinCourse(courseId: courseId, uid: uid, role: 'student');
       if (!mounted) return;
-
-      // FIX: fetch course details before navigating
-      final snap = await FirebaseDatabase.instance
-          .ref()
-          .child('courses/$courseId')
-          .get();
-
-      final data = (snap.value as Map?) ?? {};
-      final title = data['title'] ?? '';
-      final codeValue = data['code'] ?? '';
-
-      Navigator.pushNamed(
-        context,
-        AppRoutes.courseHome,
-        arguments: {
-          'courseId': courseId,
-          'title': title,
-          'code': codeValue,
-        },
-      );
+      Navigator.pushNamed(context, AppRoutes.courseHome, arguments: courseId);
     } finally {
       if (mounted) setState(() => joining = false);
     }
@@ -59,6 +40,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final db = FirebaseDatabase.instance.ref();
+    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFF009B8F),
@@ -81,6 +63,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
       ),
       body: Column(
         children: [
+          // Top decorative header curve
           Container(
             width: double.infinity,
             height: 100,
@@ -90,10 +73,13 @@ class _CoursesScreenState extends State<CoursesScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(40),
+              ),
             ),
           ),
 
+          // Courses section
           Expanded(
             child: Container(
               width: double.infinity,
@@ -105,18 +91,38 @@ class _CoursesScreenState extends State<CoursesScreen> {
               child: StreamBuilder(
                 stream: db.child('courseMembers').onValue,
                 builder: (context, snapshot) {
-                  final data = (snapshot.data?.snapshot.value as Map?) ?? {};
+                  final data =
+                      (snapshot.data?.snapshot.value as Map?) ?? {};
                   final my = <String>[];
-
                   data.forEach((courseId, members) {
-                    if ((members as Map).containsKey(uid)) {
-                      my.add(courseId);
-                    }
+                    if ((members as Map).containsKey(uid)) my.add(courseId);
                   });
 
                   if (my.isEmpty) {
-                    return const Center(
-                      child: Text("No courses yet"),
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.library_books_outlined,
+                              color: Colors.grey.shade400, size: 90),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "No courses yet",
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black87),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Join a course using code or QR",
+                            style: TextStyle(
+                                color: Colors.black54,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400),
+                          ),
+                        ],
+                      ),
                     );
                   }
 
@@ -125,32 +131,81 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     padding: const EdgeInsets.only(bottom: 80),
                     itemBuilder: (context, index) {
                       final courseId = my[index];
-
                       return FutureBuilder(
                         future: db.child('courses/$courseId').get(),
                         builder: (context, snap) {
-                          final courseData =
-                              (snap.data?.value as Map?) ?? {};
-
-                          final title = courseData['title'] ?? courseId;
-                          final courseCode = courseData['code'] ?? '';
-
-                          return ListTile(
-                            contentPadding: const EdgeInsets.all(16),
-                            title: Text(title),
-                            subtitle: Text('Course Code: $courseCode'),
-                            trailing: const Icon(Icons.arrow_forward_ios),
-                            onTap: () {
-                              Navigator.pushNamed(
+                          final title = snap.data?.value != null
+                              ? ((snap.data!.value as Map)['title'] ??
+                              courseId)
+                              : courseId;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 4),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFFE8FDF4),
+                                  Color(0xFFD6FFF5),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(16),
+                              leading: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF00C68E),
+                                      Color(0xFF009B8F)
+                                    ],
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.school_outlined,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              title: Text(
+                                title,
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF009B8F),
+                                ),
+                              ),
+                              subtitle: Text(
+                                'Course ID: $courseId',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                              trailing: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 18,
+                                color: Color(0xFF00C68E),
+                              ),
+                              onTap: () => Navigator.pushNamed(
                                 context,
                                 AppRoutes.courseHome,
-                                arguments: {
-                                  'courseId': courseId,
-                                  'title': title,
-                                  'code': courseCode,
-                                },
-                              );
-                            },
+                                arguments: title,
+                              ),
+                            ),
                           );
                         },
                       );
@@ -165,8 +220,13 @@ class _CoursesScreenState extends State<CoursesScreen> {
 
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF00C68E),
+        elevation: 6,
         icon: const Icon(Icons.add_circle_outline, color: Colors.white),
-        label: const Text("Join Course"),
+        label: const Text(
+          "Join Course",
+          style: TextStyle(
+              color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
+        ),
         onPressed: () => _showJoinModal(context),
       ),
     );
@@ -177,6 +237,9 @@ class _CoursesScreenState extends State<CoursesScreen> {
       context: context,
       backgroundColor: Colors.white,
       isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (_) {
         return Padding(
           padding: EdgeInsets.only(
@@ -188,23 +251,76 @@ class _CoursesScreenState extends State<CoursesScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Join a Course',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const Text(
+                'Join a Course',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF009B8F),
+                ),
+              ),
               const SizedBox(height: 16),
               TextField(
                 controller: codeCtrl,
                 decoration: InputDecoration(
                   hintText: 'Enter course code',
                   filled: true,
+                  fillColor: Colors.grey.shade100,
+                  prefixIcon:
+                  const Icon(Icons.key_rounded, color: Color(0xFF009B8F)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00C68E),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  padding:
+                  const EdgeInsets.symmetric(vertical: 14, horizontal: 32),
+                ),
                 onPressed: () {
                   Navigator.pop(context);
                   _join(codeCtrl.text.trim());
                 },
-                child: const Text("Join"),
+                child: const Text(
+                  "Join",
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w600),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                "or Scan QR",
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 220,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: MobileScanner(
+                    onDetect: (capture) {
+                      for (final b in capture.barcodes) {
+                        final v = b.rawValue;
+                        if (v != null && v.isNotEmpty) {
+                          Navigator.pop(context);
+                          _join(v);
+                          break;
+                        }
+                      }
+                    },
+                  ),
+                ),
               ),
             ],
           ),
