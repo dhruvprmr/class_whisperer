@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../data/repositories/rtdb_repository.dart';
 import '../../../routes/app_routes.dart';
 
@@ -304,24 +303,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              SizedBox(
-                height: 220,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: MobileScanner(
-                    onDetect: (capture) {
-                      for (final b in capture.barcodes) {
-                        final v = b.rawValue;
-                        if (v != null && v.isNotEmpty) {
-                          Navigator.pop(context);
-                          _join(v);
-                          break;
-                        }
-                      }
-                    },
-                  ),
-                ),
-              ),
+
             ],
           ),
         );
